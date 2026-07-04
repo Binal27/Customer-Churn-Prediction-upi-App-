@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ClientPulse — Login</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --cp-blue:   #4F8EF7;
+    --cp-pink:   #F75D7E;
+    --cp-teal:   #00D4AA;
+    --bg-dark:   #1d031c;
+    --glass:     rgba(255,255,255,0.04);
+    --glass-b:   rgba(255,255,255,0.08);
+    --text:      #E8ECF4;
+    --muted:     #8899BB;
+  }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg-dark);
+    min-height: 100vh;
+    display: flex;
+    overflow: hidden;
+    color: var(--text);
+  }
+
+  /* ── Animated grid background ──────────────── */
+  .bg-scene {
+    position: fixed; inset: 0; z-index: 0;
+    background:
+      radial-gradient(ellipse 80% 60% at 20% 50%, rgba(79,142,247,0.12) 0%, transparent 60%),
+      radial-gradient(ellipse 60% 80% at 80% 20%, rgba(247,93,126,0.09) 0%, transparent 60%),
+      radial-gradient(ellipse 60% 60% at 70% 80%, rgba(0,212,170,0.07) 0%, transparent 60%),
+      var(--bg-dark);
+  }
+
+  .grid-lines {
+    position: fixed; inset: 0; z-index: 0;
+    background-image:
+      linear-gradient(rgba(79,142,247,0.06) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(79,142,247,0.06) 1px, transparent 1px);
+    background-size: 48px 48px;
+    mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, black 40%, transparent 100%);
+  }
+
+  /* ── Floating orbs ─────────────────────────── */
+  .orb { position: fixed; border-radius: 50%; filter: blur(80px); animation: drift 12s ease-in-out infinite; z-index: 0; }
+  .orb-1 { width: 400px; height: 400px; background: rgba(79,142,247,0.15); top: -10%; left: -5%; animation-delay: 0s; }
+  .orb-2 { width: 300px; height: 300px; background: rgba(247,93,126,0.12); bottom: -10%; right: -5%; animation-delay: -4s; }
+  .orb-3 { width: 200px; height: 200px; background: rgba(0,212,170,0.10); top: 60%; left: 60%; animation-delay: -8s; }
+
+  @keyframes drift {
+    0%, 100% { transform: translate(0, 0); }
+    33%       { transform: translate(30px, -20px); }
+    66%       { transform: translate(-20px, 30px); }
+  }
+
+  /* ── Split layout ──────────────────────────── */
+  .split { display: flex; width: 100%; min-height: 100vh; position: relative; z-index: 1; }
+
+  /* LEFT — branding */
+  .brand-side {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 60px 64px;
+    border-right: 1px solid rgba(255,255,255,0.06);
+  }
+
+  .logo-mark {
+    display: flex; align-items: center; gap: 12px;
+    margin-bottom: 56px;
+  }
+  .logo-icon {
+    width: 44px; height: 44px; border-radius: 12px;
+    background: linear-gradient(135deg, var(--cp-blue), var(--cp-pink));
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Syne', sans-serif; font-weight: 800; font-size: 18px;
+    color: #fff; letter-spacing: -1px;
+  }
+  .logo-text { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 20px; }
+  .logo-text span { color: var(--cp-blue); }
+
+  .brand-headline {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(2rem, 3.5vw, 3.2rem);
+    font-weight: 800;
+    line-height: 1.15;
+    margin-bottom: 24px;
+    letter-spacing: -1px;
+  }
+  .brand-headline .grad {
+    background: linear-gradient(90deg, var(--cp-blue), var(--cp-teal));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  }
+
+  .brand-desc { color: var(--muted); font-size: 1.05rem; line-height: 1.7; max-width: 420px; margin-bottom: 48px; }
+
+  .stat-pills { display: flex; gap: 16px; flex-wrap: wrap; }
+  .pill {
+    background: var(--glass); border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 100px; padding: 8px 18px;
+    font-size: 0.82rem; color: var(--muted);
+    display: flex; align-items: center; gap: 8px;
+    backdrop-filter: blur(8px);
+  }
+  .pill-dot { width: 7px; height: 7px; border-radius: 50%; }
+
+  .demo-creds {
+    margin-top: 56px;
+    background: var(--glass); border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 16px; padding: 20px 24px;
+    max-width: 420px;
+  }
+  .demo-creds h4 { font-size: 0.78rem; text-transform: uppercase; letter-spacing: 1.5px; color: var(--cp-blue); margin-bottom: 14px; }
+  .cred-row { display: flex; justify-content: space-between; align-items: center; padding: 6px 0; border-bottom: 1px solid rgba(255,255,255,0.04); }
+  .cred-row:last-child { border-bottom: none; }
+  .cred-label { font-size: 0.8rem; color: var(--muted); }
+  .cred-email { font-size: 0.82rem; color: var(--text); }
+  .cred-pass {
+    font-size: 0.78rem; color: var(--cp-teal);
+    background: rgba(0,212,170,0.08); border-radius: 6px; padding: 2px 8px;
+    font-family: monospace;
+  }
+
+  /* RIGHT — form */
+  .form-side {
+    width: 480px; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    padding: 60px 48px;
+  }
+
+  .form-card {
+    width: 100%;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 24px; padding: 40px;
+    backdrop-filter: blur(20px);
+    animation: slideUp 0.5s cubic-bezier(0.22,1,0.36,1) both;
+  }
+
+  @keyframes slideUp {
+    from { opacity: 0; transform: translateY(24px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .form-title {
+    font-family: 'Syne', sans-serif; font-weight: 700; font-size: 1.75rem;
+    margin-bottom: 6px; letter-spacing: -0.5px;
+  }
+  .form-sub { font-size: 0.9rem; color: var(--muted); margin-bottom: 36px; }
+
+  .error-banner {
+    background: rgba(247,93,126,0.12); border: 1px solid rgba(247,93,126,0.3);
+    border-radius: 10px; padding: 12px 16px; margin-bottom: 24px;
+    font-size: 0.875rem; color: #F97FA0;
+    display: flex; align-items: center; gap: 10px;
+    animation: shake 0.4s cubic-bezier(.36,.07,.19,.97) both;
+  }
+  @keyframes shake {
+    0%,100% { transform: translateX(0); }
+    20%      { transform: translateX(-6px); }
+    40%      { transform: translateX(6px); }
+    60%      { transform: translateX(-4px); }
+    80%      { transform: translateX(4px); }
+  }
+
+  .field { margin-bottom: 20px; }
+  .field label { display: block; font-size: 0.8rem; font-weight: 500; color: var(--muted); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.8px; }
+
+  .input-wrap { position: relative; }
+  .input-wrap svg { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: var(--muted); pointer-events: none; }
+  .input-wrap input {
+    width: 100%; padding: 13px 14px 13px 42px;
+    background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.10);
+    border-radius: 12px; color: var(--text); font-size: 0.95rem; font-family: inherit;
+    transition: border-color 0.2s, background 0.2s, box-shadow 0.2s;
+    outline: none;
+  }
+  .input-wrap input:focus {
+    border-color: var(--cp-blue); background: rgba(79,142,247,0.06);
+    box-shadow: 0 0 0 3px rgba(79,142,247,0.15);
+  }
+  .input-wrap input::placeholder { color: rgba(136,153,187,0.5); }
+
+  .eye-btn {
+    position: absolute; right: 14px; top: 50%; transform: translateY(-50%);
+    background: none; border: none; cursor: pointer; color: var(--muted);
+    padding: 4px;
+  }
+  .eye-btn:hover { color: var(--text); }
+
+  .submit-btn {
+    width: 100%; padding: 14px;
+    background: linear-gradient(135deg, var(--cp-blue), #6B6EF7);
+    border: none; border-radius: 12px; color: #fff;
+    font-family: 'Syne', sans-serif; font-size: 1rem; font-weight: 700;
+    cursor: pointer; letter-spacing: 0.3px;
+    transition: transform 0.15s, box-shadow 0.2s;
+    position: relative; overflow: hidden;
+    margin-top: 8px;
+  }
+  .submit-btn::after {
+    content: ''; position: absolute; inset: 0;
+    background: linear-gradient(135deg, rgba(255,255,255,0.1), transparent);
+    opacity: 0; transition: opacity 0.2s;
+  }
+  .submit-btn:hover { transform: translateY(-1px); box-shadow: 0 8px 24px rgba(79,142,247,0.4); }
+  .submit-btn:hover::after { opacity: 1; }
+  .submit-btn:active { transform: translateY(0); }
+
+  .divider { display: flex; align-items: center; gap: 12px; margin: 28px 0 20px; color: var(--muted); font-size: 0.8rem; }
+  .divider::before, .divider::after { content: ''; flex: 1; height: 1px; background: rgba(255,255,255,0.07); }
+
+  .quick-logins { display: flex; flex-direction: column; gap: 8px; }
+  .quick-btn {
+    width: 100%; padding: 10px 16px; text-align: left;
+    background: var(--glass); border: 1px solid rgba(255,255,255,0.07);
+    border-radius: 10px; color: var(--muted); font-size: 0.82rem;
+    cursor: pointer; font-family: inherit; transition: all 0.15s;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .quick-btn:hover { background: rgba(255,255,255,0.07); border-color: var(--cp-blue); color: var(--text); }
+  .role-badge {
+    margin-left: auto; font-size: 0.7rem; padding: 2px 8px;
+    border-radius: 100px; background: rgba(79,142,247,0.15); color: var(--cp-blue);
+  }
+
+  /* ── Responsive ─────────────────────────────── */
+  @media (max-width: 900px) {
+    .brand-side { display: none; }
+    .form-side { width: 100%; }
+  }
+</style>
+</head>
+<body>
+<div class="bg-scene"></div>
+<div class="grid-lines"></div>
+<div class="orb orb-1"></div>
+<div class="orb orb-2"></div>
+<div class="orb orb-3"></div>
+
+<div class="split">
+  <!-- LEFT: Branding -->
+  <div class="brand-side">
+    <div class="logo-mark">
+      <div class="logo-icon">CP</div>
+      <div class="logo-text"><span>Client</span>Pulse</div>
+    </div>
+
+    <h1 class="brand-headline">
+      Predict churn<br>before it <span class="grad">happens.</span>
+    </h1>
+    <p class="brand-desc">
+       UPI customer analytics built for Indian fintech teams.
+      Understand, retain, and grow your user base with precision.
+    </p>
+
+    <div class="stat-pills">
+      <div class="pill"><div class="pill-dot" style="background:#4F8EF7"></div>100,000 users tracked</div>
+      <div class="pill"><div class="pill-dot" style="background:#00D4AA"></div>91.9% model accuracy</div>
+      <div class="pill"><div class="pill-dot" style="background:#F75D7E"></div>20 cities mapped</div>
+    </div>
+
+    <div class="demo-creds">
+      <h4>Credentials</h4>
+      <div class="cred-row">
+        <span class="cred-label">Admin</span>
+        <span class="cred-email">admin@clientpulse.com</span>
+        <span class="cred-pass">Admin@123</span>
+      </div>
+      <div class="cred-row">
+        <span class="cred-label">Analyst</span>
+        <span class="cred-email">analyst@clientpulse.com</span>
+        <span class="cred-pass">Analyst@123</span>
+      </div>
+      <div class="cred-row">
+        <span class="cred-label">Viewer</span>
+        <span class="cred-email">viewer@clientpulse.com</span>
+        <span class="cred-pass">Viewer@123</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- RIGHT: Form -->
+  <div class="form-side">
+    <div class="form-card">
+      <h2 class="form-title">Welcome back</h2>
+      <p class="form-sub">Sign in to your ClientPulse workspace</p>
+
+      {% if error %}
+      <div class="error-banner">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        {{ error }}
+      </div>
+      {% endif %}
+
+      <form method="POST">
+        <div class="field">
+          <label>Email address</label>
+          <div class="input-wrap">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+            <input type="email" name="email" id="email" placeholder="you@clientpulse.com" required autocomplete="email">
+          </div>
+        </div>
+        <div class="field">
+          <label>Password</label>
+          <div class="input-wrap">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            <input type="password" name="password" id="password" placeholder="••••••••" required autocomplete="current-password">
+            <button type="button" class="eye-btn" onclick="togglePwd()">
+              <svg id="eye-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            </button>
+          </div>
+        </div>
+        <button type="submit" class="submit-btn">Sign in to Dashboard →</button>
+      </form>
+
+      <div class="divider">or sign in quickly as</div>
+
+      <div class="quick-logins">
+        <button class="quick-btn" onclick="fillCreds('admin@clientpulse.com','Admin@123')">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          admin@clientpulse.com
+          <span class="role-badge">Admin</span>
+        </button>
+        <button class="quick-btn" onclick="fillCreds('analyst@clientpulse.com','Analyst@123')">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+          analyst@clientpulse.com
+          <span class="role-badge" style="background:rgba(0,212,170,0.15);color:#00D4AA">Analyst</span>
+        </button>
+        <button class="quick-btn" onclick="fillCreds('viewer@clientpulse.com','Viewer@123')">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+          viewer@clientpulse.com
+          <span class="role-badge" style="background:rgba(247,93,126,0.15);color:#F75D7E">Viewer</span>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  function togglePwd() {
+    const inp = document.getElementById('password');
+    inp.type = inp.type === 'password' ? 'text' : 'password';
+  }
+  function fillCreds(email, pass) {
+    document.getElementById('email').value = email;
+    document.getElementById('password').value = pass;
+    document.querySelector('.submit-btn').click();
+  }
+</script>
+</body>
+</html>
